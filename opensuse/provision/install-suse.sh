@@ -80,6 +80,11 @@ function setup_utils {
     echo 'PATH=$PATH:'$USER_HOME/utils >> $USER_HOME/.profile
 }
 
+function set_default_login_commands {
+    echo "sudo service docker start" >> $USER_HOME/.profile
+    echo "# docker login -u ... -p ..."
+}
+
 function finalize {
     source $USER_HOME/.profile
     sbt clean
@@ -95,4 +100,5 @@ install_docker
 install_java
 install_scala
 install_sbt
+set_default_login_commands
 finalize
