@@ -1,0 +1,33 @@
+{
+  "variables": {
+    "ssh_username": "ec2-user",
+    "aws_instance_type": "c5d.4xlarge",
+    "aws_profile": "{{env `AWS_PROFILE`}}",
+    "aws_region": "us-east-1",
+    "source_ami": "ami-0083662ba17882949",
+    "aws_ami_prefix": "dart-cetnos7"
+  },
+  "builders": [
+    {
+      "profile": "{{user `aws_profile`}}",
+      "ami_name": "{{user `aws_ami_prefix`}}-{{isotime | clean_resource_name}}",
+      "instance_type": "{{user `aws_instance_type`}}",
+      "region": "{{user `aws_region`}}",
+      "source_ami": "{{user `source_ami`}}",
+      "ssh_username": "{{user `ssh_username`}}",
+      "type": "amazon-ebs"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "environment_vars": ["SSH_USERNAME={{user `ssh_username`}}"],
+      "execute_command": "echo '{{user `ssh_password`}}' | sudo -E -S  env {{ .Vars }} bash '{{ .Path }}'",
+      "expect_disconnect": true,
+      "pause_before": "50s",
+      "scripts": [
+        "provision/setup.sh"
+      ]
+    }
+  ]
+}
