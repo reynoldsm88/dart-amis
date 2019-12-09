@@ -22,6 +22,7 @@ function install_git {
     echo "installing git"
     sudo yum install -y git-core
     curl -L -o $USER_HOME/.git-completion.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
+    chmod +x $USER_HOME/.git-completion.sh
     echo "
 if [ -f ~/.git-completion.sh ]; then
   . ~/.git-completion.sh
@@ -83,7 +84,7 @@ function install_docker {
 
     echo "# echo <> | docker login -u <> --password-stdin" >> $USER_HOME/.bashrc
     sudo chmod -R u+x $USER_HOME/etc
-    sudo echo "$USER_HOME/etc/docker-service.sh"
+    sudo echo "~/etc/docker-service.sh" >> $USER_HOME/.bashrc
 }
 
 function setup_utils {
