@@ -2,7 +2,6 @@
 export USER_HOME="/home/centos"
 
 function setup {
-    usermod -aG wheel centos
     echo "setting up home directory $USER_HOME"
     mkdir -p $USER_HOME/{tools,etc}
     echo "running update $USER_HOME"
@@ -13,10 +12,10 @@ function setup {
     sudo yum install -y net-tools
     sudo yum install -y telnet
     sudo echo "vm.max_map_count = 262144" >> /etc/sysctl.conf
-    sudo echo "#!/bin/bash" >> $USER_HOME/.profile
+    sudo echo "#!/bin/bash" >> $USER_HOME/.bashrc
 
-    # ssh-keygen -b 4096 -t rsa -f $USER_HOME/.ssh/id_rsa -q -N "" -P "" -C michael.reynolds@twosixlabs.com
-    # cat $USER_HOME/.ssh/id_rsa.pub >> $USER_HOME/.ssh/authorized_keys
+    ssh-keygen -b 4096 -t rsa -f $USER_HOME/.ssh/id_rsa -q -N "" -P "" -C michael.reynolds@twosixlabs.com
+    cat $USER_HOME/.ssh/id_rsa.pub >> $USER_HOME/.ssh/authorized_keys
 }
 
 function install_git {
@@ -27,7 +26,7 @@ function install_git {
 if [ -f ~/.git-completion.sh ]; then
   . ~/.git-completion.sh
 fi
-    " >> $USER_HOME/.profile
+    " >> $USER_HOME/.bashrc
 }
 
 function install_pip {
@@ -52,8 +51,8 @@ function install_scala {
 
     SCALA_INSTALL=$(find . -name scala-*)
     mv $SCALA_INSTALL $USER_HOME/tools/scala
-    sudo echo "export SCALA_HOME="$USER_HOME/tools/scala >> $USER_HOME/.profile
-    sudo echo 'export PATH=$PATH:'$USER_HOME/tools/scala/bin >> $USER_HOME/.profile
+    sudo echo "export SCALA_HOME="$USER_HOME/tools/scala >> $USER_HOME/.bashrc
+    sudo echo 'export PATH=$PATH:'$USER_HOME/tools/scala/bin >> $USER_HOME/.bashrc
 
     sudo chmod -R 755 $USER_HOME/tools/scala
 }
@@ -67,9 +66,9 @@ function install_sbt {
 
     SBT_INSTALL=sbt
     mv $SBT_INSTALL $USER_HOME/tools/sbt
-    sudo echo "export SBT_HOME="$USER_HOME/tools/sbt >> $USER_HOME/.profile
-    sudo echo 'export PATH=$PATH:'$USER_HOME/tools/sbt/bin >> $USER_HOME/.profile
-    sudo echo 'export SBT_OPTS="-Xms2G -Xmx4G"' >> $USER_HOME/.profile
+    sudo echo "export SBT_HOME="$USER_HOME/tools/sbt >> $USER_HOME/.bashrc
+    sudo echo 'export PATH=$PATH:'$USER_HOME/tools/sbt/bin >> $USER_HOME/.bashrc
+    sudo echo 'export SBT_OPTS="-Xms2G -Xmx4G"' >> $USER_HOME/.bashrc
     sudo chmod -R 755 $USER_HOME/tools/sbt
 }
 
@@ -78,9 +77,11 @@ function install_docker {
     sudo groupadd docker
     sudo usermod -aG docker centos
     sudo yum install -y docker
-    sudo pip3 install docker-compose
+    sudo /usr/local/bin/pip3 install docker-compose
     sudo echo "#!/bin/bash" >> $USER_HOME/etc/docker-service.sh
     sudo echo "sudo service docker start" >> $USER_HOME/etc/docker-service.sh
+
+    echo "# echo <> | docker login -u <> --password-stdin" >> $USER_HOME/.bashrc
     sudo chmod -R u+x $USER_HOME/etc
     sudo echo "$USER_HOME/etc/docker-service.sh"
 }
@@ -88,15 +89,15 @@ function install_docker {
 function setup_utils {
     git clone https://github.com/reynoldsm88/sanity-scripts.git utils
     chmod -R u+x utils
-    echo 'PATH=$PATH:'$USER_HOME/utils >> $USER_HOME/.profile
+    echo 'PATH=$PATH:'$USER_HOME/utils >> $USER_HOME/.bashrc
 }
 
 function finalize {
-    source $USER_HOME/.profile
     sbt clean
     rm -r -f target
     rm -r -f project
     sudo chown -R centos:centos $USER_HOME
+    source $USER_HOME/.bashrc
 }
 
 setup

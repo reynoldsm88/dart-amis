@@ -4,8 +4,8 @@
     "aws_instance_type": "c5d.4xlarge",
     "aws_profile": "{{env `AWS_PROFILE`}}",
     "aws_region": "us-east-1",
-    "source_ami": "ami-0083662ba17882949",
-    "aws_ami_prefix": "dart-cetnos7"
+    "source_ami": "ami-02eac2c0129f6376b",
+    "aws_ami_prefix": "dart-centos7"
   },
   "builders": [
     {
@@ -24,7 +24,7 @@
       "environment_vars": ["SSH_USERNAME={{user `ssh_username`}}"],
       "execute_command": "echo '{{user `ssh_password`}}' | sudo -E -S  env {{ .Vars }} bash '{{ .Path }}'",
       "expect_disconnect": true,
-      "pause_before": "50s",
+      "pause_before": "20s",
       "scripts": [
         "provision/setup.sh"
       ]
