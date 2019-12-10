@@ -81,10 +81,10 @@ function install_docker {
     sudo /usr/local/bin/pip3 install docker-compose
     sudo echo "#!/bin/bash" >> $USER_HOME/etc/docker-service.sh
     sudo echo "sudo service docker start" >> $USER_HOME/etc/docker-service.sh
-
-    echo "# echo <> | docker login -u <> --password-stdin" >> $USER_HOME/.bashrc
     sudo chmod -R u+x $USER_HOME/etc
     sudo echo "~/etc/docker-service.sh" >> $USER_HOME/.bashrc
+    echo "# echo <> | docker login -u <> --password-stdin" >> $USER_HOME/.bashrc
+    echo "# docker login -u <> --p <> docker.causeex.com" >> $USER_HOME/.bashrc
 }
 
 function setup_utils {
