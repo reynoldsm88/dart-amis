@@ -79,10 +79,11 @@ function install_docker {
     sudo usermod -aG docker centos
     sudo yum install -y docker
     sudo /usr/local/bin/pip3 install docker-compose
+    sudo mkdir $USER_HOME/etc
     sudo echo "#!/bin/bash" >> $USER_HOME/etc/docker-service.sh
     sudo echo "sudo service docker start" >> $USER_HOME/etc/docker-service.sh
     sudo chmod -R u+x $USER_HOME/etc
-    sudo echo "~/etc/docker-service.sh" >> $USER_HOME/.bashrc
+    sudo echo "$USER_HOME/etc/docker-service.sh" >> $USER_HOME/.bashrc
     echo "# echo <> | docker login -u <> --password-stdin" >> $USER_HOME/.bashrc
     echo "# docker login -u <> --p <> docker.causeex.com" >> $USER_HOME/.bashrc
 }
@@ -101,6 +102,11 @@ function finalize {
     source $USER_HOME/.bashrc
 }
 
+function disable_selinux {
+    sudo echo "SELINUX=disabled" > /etc/selinux/config
+    sudo echo "SELINUXTYPE=targeted" >> /etc/selinux/config
+}
+
 setup
 install_git
 setup_utils
@@ -109,4 +115,5 @@ install_docker
 install_java
 install_scala
 install_sbt
+disable_selinux
 finalize
