@@ -12,7 +12,6 @@ function setup {
     sudo yum install -y net-tools
     sudo yum install -y telnet
     sudo echo "vm.max_map_count = 262144" >> /etc/sysctl.conf
-    sudo echo "#!/bin/bash" >> $USER_HOME/.bashrc
 
     ssh-keygen -b 4096 -t rsa -f $USER_HOME/.ssh/id_rsa -q -N "" -P "" -C michael.reynolds@twosixlabs.com
     cat $USER_HOME/.ssh/id_rsa.pub >> $USER_HOME/.ssh/authorized_keys
@@ -23,11 +22,6 @@ function install_git {
     sudo yum install -y git-core
     curl -L -o $USER_HOME/.git-completion.sh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
     chmod +x $USER_HOME/.git-completion.sh
-    echo "
-if [ -f ~/.git-completion.sh ]; then
-  . ~/.git-completion.sh
-fi
-    " >> $USER_HOME/.bashrc
 }
 
 function install_pip {
@@ -67,9 +61,6 @@ function install_sbt {
 
     SBT_INSTALL=sbt
     mv $SBT_INSTALL $USER_HOME/tools/sbt
-    sudo echo "export SBT_HOME="$USER_HOME/tools/sbt >> $USER_HOME/.bashrc
-    sudo echo 'export PATH=$PATH:'$USER_HOME/tools/sbt/bin >> $USER_HOME/.bashrc
-    sudo echo 'export SBT_OPTS="-Xms2G -Xmx4G"' >> $USER_HOME/.bashrc
     sudo chmod -R 755 $USER_HOME/tools/sbt
 }
 
@@ -83,15 +74,11 @@ function install_docker {
     sudo echo "#!/bin/bash" >> $USER_HOME/etc/docker-service.sh
     sudo echo "sudo service docker start" >> $USER_HOME/etc/docker-service.sh
     sudo chmod -R u+x $USER_HOME/etc
-    sudo echo "$USER_HOME/etc/docker-service.sh" >> $USER_HOME/.bashrc
-    echo "# echo <> | docker login -u <> --password-stdin" >> $USER_HOME/.bashrc
-    echo "# docker login -u <> --p <> docker.causeex.com" >> $USER_HOME/.bashrc
 }
 
 function setup_utils {
     git clone https://github.com/reynoldsm88/sanity-scripts.git utils
     chmod -R u+x utils
-    echo 'PATH=$PATH:'$USER_HOME/utils >> $USER_HOME/.bashrc
 }
 
 function finalize {
@@ -99,6 +86,15 @@ function finalize {
     rm -r -f target
     rm -r -f project
     sudo chown -R centos:centos $USER_HOME
+    
+    # download our bashrc so that we can differentiate interactive and non interactive terminals
+    if [ -f "$USER_HOME/.bashrc" ]; then
+        echo "removing existing .bashrc file"
+        rm $USER_HOME/.bashrc
+    fi
+
+    curl -o $USER_HOME/.bashrc https://raw.githubusercontent.com/reynoldsm88/dart-amis/master/centos7/bin/bashrc
+    chmod u+x $USER_HOME/.bashrc
     source $USER_HOME/.bashrc
 }
 
