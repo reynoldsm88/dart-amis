@@ -1,28 +1,22 @@
 # .bashrc
 
-# Source global definitions
-if [ -f /etc/bashrc ]; then
-    . /etc/bashrc
+# if it's a non-interactive shell don't do anything
+if [ ! -t 0 ]; then
+    return
 fi
 
-# Uncomment the following line if you don't like systemctl's auto-paging feature:
-# export SYSTEMD_PAGER=
-
-# User specific aliases and functions
-#!/bin/bash
-
+# git auto-completion
 if [ -f ~/.git-completion.sh ]; then
   . ~/.git-completion.sh
 fi
 
-if [[ $- =~ "i" ]]; then
-    PATH=$PATH:/home/centos/utils
-    /home/centos/etc/docker-service.sh
-    export SCALA_HOME=/home/centos/tools/scala
-    export PATH=$PATH:/home/centos/tools/scala/bin
-    export SBT_HOME=/home/centos/tools/sbt
-    export PATH=$PATH:/home/centos/tools/sbt/bin
-    export SBT_OPTS="-Xms2G -Xmx4G"
-    # echo <> | docker login -u <> --password-stdin
-    # docker login -u <> --p <> docker.causeex.com
-fi
+PATH=$PATH:/home/centos/utils
+/home/centos/etc/docker-service.sh
+
+export SCALA_HOME=/home/centos/tools/scala
+export PATH=$PATH:/home/centos/tools/scala/bin
+export SBT_HOME=/home/centos/tools/sbt
+export PATH=$PATH:/home/centos/tools/sbt/bin
+export SBT_OPTS="-Xms2G -Xmx4G"
+# echo <> | docker login -u <> --password-stdin
+# docker login -u <username> -p <password> docker.myrepo.com
