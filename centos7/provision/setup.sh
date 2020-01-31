@@ -94,7 +94,7 @@ function finalize {
     fi
 
     curl -o $USER_HOME/.bashrc https://raw.githubusercontent.com/reynoldsm88/dart-amis/master/centos7/bin/bashrc
-    sudo chown centos:centos ~/USER_HOME/.bashrc
+    sudo chown centos:centos $USER_HOME/.bashrc
     chmod u+x $USER_HOME/.bashrc
     source $USER_HOME/.bashrc
 }
