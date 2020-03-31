@@ -65,10 +65,28 @@ function install_sbt {
 }
 
 function install_docker {
-    echo "installing docker"
+    echo "installing latest docker community edition"
+
     sudo groupadd docker
     sudo usermod -aG docker centos
-    sudo yum install -y docker
+
+    sudo yum remove -y docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
+
+    sudo yum install -y yum-utils \
+         device-mapper-persistent-data \
+         lvm2
+
+    sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+    sudo yum install -y docker-ce docker-ce-cli containerd.io
+
     sudo /usr/local/bin/pip3 install docker-compose
     sudo mkdir $USER_HOME/etc
     sudo echo "#!/bin/bash" >> $USER_HOME/etc/docker-service.sh
@@ -108,9 +126,9 @@ setup
 install_git
 setup_utils
 install_pip
-install_docker
 install_java
 install_scala
 install_sbt
+install_docker
 disable_selinux
 finalize
