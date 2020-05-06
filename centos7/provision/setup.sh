@@ -122,6 +122,47 @@ function disable_selinux {
     sudo echo "SELINUXTYPE=targeted" >> /etc/selinux/config
 }
 
+function create_java_keystore {
+    CERTIFICATE_CN=localhost
+    PASSWORD=changeme
+    CERT_DIR=/opt/app/certs/
+
+    mkdir -p $CERT_DIR
+
+    # Generate jks keystore with a private key
+    keytool -genkey -noprompt \
+    -alias server-key \
+    -dname "CN=$CERTIFICATE_CN" \
+    -keystore $CERT_DIR/server.keystore.jks \
+    -storepass "$PASSWORD" \
+    -keypass "$PASSWORD" \
+    -validity 365 \
+    -deststoretype pkcs12 \
+    -keyalg RSA -genkey
+
+    ## Generate private key and cert for Certificate Authority
+    ## The req command primarily creates and processes certificate requests in PKCS#10 format.
+    ## It can additionally create self signed certificates for use as root CAs for example.
+    openssl req -new -x509 -keyout ca-key -out ca-cert -days 365 -passout pass:"$PASSWORD" -subj "/CN=$CERTIFICATE_CN"
+
+    ## Import Certificate authority certificate into server jks and create certstore jks for client
+    keytool -keystore $CERT_DIR/server.truststore.jks -alias CARoot -import -file ca-cert -keypass "$PASSWORD" -storepass "$PASSWORD" -noprompt
+    keytool -keystore $CERT_DIR/client.truststore.jks -alias CARoot -import -file ca-cert -keypass "$PASSWORD" -storepass "$PASSWORD" -noprompt
+
+    # Generate a certificate request
+    keytool -keystore $CERT_DIR/server.keystore.jks -alias server-key -certreq -file cert-file -keypass "$PASSWORD" -storepass "$PASSWORD" -noprompt
+
+    # Signed a certificagte request with previously created Certificate Authority
+    openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-signed -days 365 -CAcreateserial -passin pass:"$PASSWORD"
+
+    # Importing signed certificate
+    keytool -keystore $CERT_DIR/server.keystore.jks -alias CARoot -import -file ca-cert -storepass "$PASSWORD" -noprompt -keypass "$PASSWORD"
+    keytool -keystore $CERT_DIR/server.keystore.jks -alias server-key -import -file cert-signed -storepass "$PASSWORD" -noprompt -keypass "$PASSWORD"
+
+    echo "cert dir output"
+    ls -al $CERT_DIR
+}
+
 setup
 install_git
 setup_utils
@@ -129,6 +170,7 @@ install_pip
 install_java
 install_scala
 install_sbt
+create_java_keystore
 install_docker
 disable_selinux
 finalize
