@@ -10,7 +10,7 @@
   "builders": [
     {
       "profile": "{{user `aws_profile`}}",
-      "ami_name": "{{user `aws_ami_prefix`}}-{{isotime | clean_resource_name}}",
+      "ami_name": "dart-centos7-v.1.0.1-{{isotime | clean_resource_name}}",
       "instance_type": "{{user `aws_instance_type`}}",
       "region": "{{user `aws_region`}}",
       "source_ami": "{{user `source_ami`}}",
