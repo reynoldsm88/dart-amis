@@ -6,11 +6,12 @@ function setup {
     mkdir -p $USER_HOME/{tools,etc}
     echo "running update $USER_HOME"
     sudo yum update -y
-    echo "running install $USER_HOME"
+    sudo yum install -y epel-release
+    sudo yum install -y net-tools
     sudo yum install -y make
     sudo yum install -y vim
-    sudo yum install -y net-tools
     sudo yum install -y telnet
+    sudo yum install -y htop
     sudo echo "vm.max_map_count = 262144" >> /etc/sysctl.conf
 
     ssh-keygen -b 4096 -t rsa -f $USER_HOME/.ssh/id_rsa -q -N "" -P "" -C michael.reynolds@twosixlabs.com
