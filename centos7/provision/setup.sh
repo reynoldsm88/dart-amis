@@ -11,6 +11,7 @@ function setup {
     sudo yum install -y vim
     sudo yum install -y net-tools
     sudo yum install -y telnet
+    sudo yum install -y awscli
     sudo echo "vm.max_map_count = 262144" >> /etc/sysctl.conf
 
     ssh-keygen -b 4096 -t rsa -f $USER_HOME/.ssh/id_rsa -q -N "" -P "" -C michael.reynolds@twosixlabs.com
@@ -68,7 +69,9 @@ function install_docker {
     echo "installing docker"
     sudo groupadd docker
     sudo usermod -aG docker centos
-    sudo yum install -y docker
+    sudo yum-config-manager \
+          --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    sudo yum -y install docker-ce docker-ce-cli containerd.io
     sudo /usr/local/bin/pip3 install docker-compose
     sudo mkdir $USER_HOME/etc
     sudo echo "#!/bin/bash" >> $USER_HOME/etc/docker-service.sh

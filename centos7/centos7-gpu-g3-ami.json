@@ -1,0 +1,68 @@
+{
+  "variables": {
+    "ssh_username": "centos",
+    "aws_instance_type": "g3.4xlarge",
+    "aws_profile": "{{env `AWS_PROFILE`}}",
+    "aws_region": "us-east-1",
+    "source_ami": "ami-02eac2c0129f6376b",
+    "aws_ami_prefix": "dart-centos7"
+  },
+  "builders": [
+    {
+      "profile": "{{user `aws_profile`}}",
+      "ami_name": "{{user `aws_ami_prefix`}}-gpu-g3-{{isotime | clean_resource_name}}",
+      "instance_type": "{{user `aws_instance_type`}}",
+      "region": "{{user `aws_region`}}",
+      "source_ami": "{{user `source_ami`}}",
+      "ssh_username": "{{user `ssh_username`}}",
+      "type": "amazon-ebs",
+      "temporary_iam_instance_profile_policy_document": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": [
+              "s3:*"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+          }
+        ]
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "environment_vars": [
+        "SSH_USERNAME={{user `ssh_username`}}"
+      ],
+      "execute_command": "echo '{{user `ssh_password`}}' | sudo -E -S  env {{ .Vars }} bash '{{ .Path }}'",
+      "expect_disconnect": true,
+      "pause_before": "20s",
+      "scripts": [
+        "provision/setup.sh",
+        "private/setup.sh",
+        "provision/setup-gpu-requirements.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo reboot"
+      ],
+      "inline_shebang": "/bin/bash -e",
+      "expect_disconnect": true
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+        "SSH_USERNAME={{user `ssh_username`}}"
+      ],
+      "execute_command": "echo '{{user `ssh_password`}}' | sudo -E -S  env {{ .Vars }} bash '{{ .Path }}'",
+      "pause_before": "30s",
+      "scripts": [
+        "provision/setup-gpu-drivers.sh"
+      ]
+    }
+  ]
+}
