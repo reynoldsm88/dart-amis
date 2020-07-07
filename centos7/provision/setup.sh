@@ -11,6 +11,7 @@ function setup {
     sudo yum install -y make
     sudo yum install -y vim
     sudo yum install -y telnet
+    sudo yum install -y awscli
     sudo yum install -y htop
     sudo echo "vm.max_map_count = 262144" >> /etc/sysctl.conf
 
@@ -70,6 +71,9 @@ function install_docker {
 
     sudo groupadd docker
     sudo usermod -aG docker centos
+    sudo yum-config-manager \
+          --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    sudo yum -y install docker-ce docker-ce-cli containerd.io
 
     sudo yum remove -y docker \
                   docker-client \
