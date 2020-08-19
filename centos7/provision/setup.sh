@@ -1,7 +1,7 @@
 #!/bin/bash
 export USER_HOME="/home/centos"
 
-function setup {
+function install_commons {
     echo "setting up home directory $USER_HOME"
     mkdir -p $USER_HOME/{tools,etc}
     echo "running update $USER_HOME"
@@ -13,6 +13,8 @@ function setup {
     sudo yum install -y telnet
     sudo yum install -y awscli
     sudo yum install -y htop
+    sudo yum install -y wget
+    sudo yum update -y
     sudo echo "vm.max_map_count = 262144" >> /etc/sysctl.conf
 
     ssh-keygen -b 4096 -t rsa -f $USER_HOME/.ssh/id_rsa -q -N "" -P "" -C michael.reynolds@twosixlabs.com
@@ -26,12 +28,16 @@ function install_git {
     chmod +x $USER_HOME/.git-completion.sh
 }
 
-function install_pip {
+function install_python_utils {
     echo "installing python stuff"
     sudo yum install -y python3
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
     sudo python3 get-pip.py
     rm get-pip.py
+
+    su - centos -c 'pip install ipython'
+
+    echo "export PYTHONUNBUFFERED=TRUE" >> $USER_HOME/.bashrc
 }
 
 function install_java {
@@ -97,25 +103,29 @@ function install_docker {
     sudo echo "#!/bin/bash" >> $USER_HOME/etc/docker-service.sh
     sudo echo "sudo service docker start" >> $USER_HOME/etc/docker-service.sh
     sudo chmod -R u+x $USER_HOME/etc
+
+    sudo wget https://github.com/bcicen/ctop/releases/download/v0.7.3/ctop-0.7.3-linux-amd64 -O /usr/local/bin/ctop
+    sudo chmod +x /usr/local/bin/ctop
 }
 
-function setup_utils {
+function install_sanity_scripts {
     git clone https://github.com/reynoldsm88/sanity-scripts.git utils
     chmod -R u+x utils
 }
 
 function finalize {
+    sudo rm -r -f /var/cache/yum
+    sudo chown -R centos:centos $USER_HOME
+
     sbt clean
     rm -r -f target
     rm -r -f project
-    sudo chown -R centos:centos $USER_HOME
     
     # download our bashrc so that we can differentiate interactive and non interactive terminals
     if [ -f "$USER_HOME/.bashrc" ]; then
         echo "removing existing .bashrc file"
         rm $USER_HOME/.bashrc
     fi
-
     curl -o $USER_HOME/.bashrc https://raw.githubusercontent.com/reynoldsm88/dart-amis/master/centos7/bin/bashrc
     sudo chown centos:centos $USER_HOME/.bashrc
     chmod u+x $USER_HOME/.bashrc
@@ -168,10 +178,10 @@ function create_java_keystore {
     ls -al $CERT_DIR
 }
 
-setup
+install_commons
 install_git
-setup_utils
-install_pip
+install_sanity_scripts
+install_python_utils
 install_java
 install_scala
 install_sbt

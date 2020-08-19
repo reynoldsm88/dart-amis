@@ -10,13 +10,17 @@ if [ -f ~/.git-completion.sh ]; then
   . ~/.git-completion.sh
 fi
 
-PATH=$PATH:/home/centos/utils
+SANITY_SCRIPTS=$PATH:/home/centos/utils
 /home/centos/etc/docker-service.sh
 
+export PYTHONUNBUFFERED=TRUE
+
 export SCALA_HOME=/home/centos/tools/scala
-export PATH=$PATH:/home/centos/tools/scala/bin
+
 export SBT_HOME=/home/centos/tools/sbt
-export PATH=$PATH:/home/centos/tools/sbt/bin
 export SBT_OPTS="-Xms2G -Xmx4G"
+
+export PATH=$PATH:$SANITY_SCRIPTS:$SCALA_HOME/bin:$SBT_HOME/bin
+
 # echo <> | docker login -u <> --password-stdin
 # docker login -u <username> -p <password> docker.myrepo.com
